@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "datahtml"
+description = 'A lib to work with html and web data'
+readme = "README.md"
+requires-python = ">=3.7"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Xavier Petit", email = "nuxion@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+	"beautifulsoup4~=4.10.0",
+	"lxml~=4.6.3",
+	"ujson~=4.2.0",
+	"extruct~=0.13.0",
+	"feedparser~=6.0.8",
+	"reppy~=0.4.14",
+	"newspaper3k~=0.2.8",
+]
+dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://github.com/algorinfo/datahtml#readme"
+Issues = "https://github.com/algorinfo/datahtml/issues"
+Source = "https://github.com/algorinfo/datahtml"
+
+[tool.hatch.version]
+path = "datahtml/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+  "pip-tools"
+]
+[tool.hatch.envs.default.scripts]
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=datahtml --cov=tests {args}"
+no-cov = "cov --no-cov {args}"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["37", "38", "39", "310", "311"]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = [
+  "datahtml/__about__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
