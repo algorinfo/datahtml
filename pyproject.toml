@@ -29,7 +29,7 @@ dependencies = [
 	"ujson~=4.2.0",
 	"extruct~=0.13.0",
 	"feedparser~=6.0.8",
-	"reppy~=0.4.14",
+	# "reppy~=0.4.14",
 	"newspaper3k~=0.2.8",
 	"httpx~=0.23.0",
 ]

@@ -1,11 +1,10 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional
+from datahtml.parsers import extract_json,extract_metadata, findkeys
+from typing import List, Optional, Union
+from urllib.parse import urlparse, parse_qs
 
 from bs4 import BeautifulSoup as BS
-
-from datahtml.parsers import extract_json, extract_metadata
-
 
 @dataclass
 class ChannelVideo:
@@ -34,9 +33,57 @@ class ChannelMeta:
     family_safe: bool
     crawled_at: datetime
     available_countries: List[str] = field(default_factory=list)
-    playlists: Optional[List[ChannelPlaylist]] = None
-    main_video: Optional[str] = None
+    # playlists: Optional[List[ChannelPlaylist]] = None
+    # main_video: Optional[str] = None
+    view_count: Optional[str] = None
+    joined: Optional[str] = None
+    location: Optional[str] = None
+    social_links: List[str] = []
 
+    
+def _get_location(data) -> Union[str, None]:
+    keys = list(findkeys(data, "country"))
+    if keys:
+        return keys[0].get("simpleText")
+    return None
+
+def _get_view_counts(data):
+    keys = list(findkeys(data, "viewCountText"))
+    if keys:
+        return keys[0].get("simpleText")
+    return None
+
+
+def _parse_social_link(link):
+    url = link["navigationEndpoint"]["urlEndpoint"]["url"]
+    parsed = urlparse(url)
+    q = parse_qs(parsed.query)
+    social = q.get("q")[0]
+    return social
+
+def _get_primary_links(data):
+    keys = list(findkeys(data, "primaryLinks"))
+    final = []
+    if keys:
+        links = keys[0]
+        for link in links:
+                try:
+                    l = _parse_social_link(link)
+                    final.append(l)
+                except (KeyError, IndexError):
+                    pass
+    return final 
+     
+
+def _get_date_creation(data):
+    keys = list(findkeys(data, "joinedDateText"))
+    if keys:
+        try:
+            return keys[0].get("runs")[1]["text"]
+        except (KeyError, IndexError):
+            pass
+    return None
+    
 
 def _get_tags(data):
     return data[1]["microformat"]['microformatDataRenderer']["tags"]
@@ -104,13 +151,14 @@ def _get_attr(attrs, key):
                 return attr["content"]
         
 
-        
-
-
 def transform_channel(html):
     soup = BS(html)
     attrs = extract_metadata(soup)
     jdata = extract_json(soup)
+
+    country = _get_location(jdata)
+    view_count = _get_view_counts(jdata)
+    joined = _get_date_creation(jdata)
 
     tags = _get_tags(jdata)
     try:
@@ -120,14 +168,15 @@ def transform_channel(html):
 
     family = _is_family_safe(jdata)
     sus = _get_subscribers(jdata)
-    try:
-        playlists = _get_playlists(jdata)
-    except KeyError:
-        playlists = None
-    try:
-        main_video = _get_main_video(jdata)
-    except KeyError:
-        main_video = None
+    socials = _get_primary_links(jdata)
+    # try:
+    #     playlists = _get_playlists(jdata)
+    # except KeyError:
+    #     playlists = None
+    # try:
+    #     main_video = _get_main_video(jdata)
+    # except KeyError:
+    #     main_video = None
     return ChannelMeta(
         id=_get_attr(attrs, "channelId"),
         name=_get_attr(attrs, "name"),
@@ -138,8 +187,14 @@ def transform_channel(html):
         subscribers=sus,
         family_safe=family,
         crawled_at=datetime.utcnow(),
-        playlists=playlists,
-        main_video=main_video
+        # playlists=playlists,
+        # main_video=main_video,
+        location=country,
+        joined=joined,
+        view_count=view_count,
+        social_links=socials
         
     )
-    
+
+def from_id2url(id_) -> str:
+    return f"https://www.youtube.com/channel/{id_}"
