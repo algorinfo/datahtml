@@ -31,6 +31,7 @@ dependencies = [
 	"feedparser~=6.0.8",
 	"reppy~=0.4.14",
 	"newspaper3k~=0.2.8",
+	"httpx~=0.23.0",
 ]
 dynamic = ["version"]
 
@@ -46,7 +47,11 @@ path = "datahtml/__about__.py"
 dependencies = [
   "pytest",
   "pytest-cov",
-  "pip-tools"
+  "pip-tools",
+  "isort",
+  "pylint>2.6.0", # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#id4
+  "black~=22.10.0",
+  "black-macchiato", # for partial update of buffers in emacs
 ]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=datahtml --cov=tests {args}"
@@ -61,6 +66,8 @@ parallel = true
 omit = [
   "datahtml/__about__.py",
 ]
+[tool.isort]
+profile = "black"
 
 [tool.coverage.report]
 exclude_lines = [
