@@ -32,13 +32,13 @@ class ChannelMeta:
     name: str
     description: str
     thumbnail_url: str
-    tags: List[str]
-    subscribers: str
     family_safe: bool
     crawled_at: datetime
+    tags: list = field(default_factory=list)
     available_countries: List[str] = field(default_factory=list)
     # playlists: Optional[List[ChannelPlaylist]] = None
     # main_video: Optional[str] = None
+    subscribers: Optional[str] = None
     view_count: Optional[str] = None
     joined: Optional[str] = None
     location: Optional[str] = None
@@ -60,10 +60,13 @@ def _get_view_counts(data):
 
 
 def _parse_social_link(link):
-    url = link["navigationEndpoint"]["urlEndpoint"]["url"]
-    parsed = urlparse(url)
-    q = parse_qs(parsed.query)
-    social = q.get("q")[0]
+    try:
+        url = link["navigationEndpoint"]["urlEndpoint"]["url"]
+        parsed = urlparse(url)
+        q = parse_qs(parsed.query)
+        social = q.get("q")[0]
+    except TypeError:
+        social = None
     return social
 
 
@@ -92,7 +95,11 @@ def _get_date_creation(data):
 
 
 def _get_tags(data):
-    return data[1]["microformat"]["microformatDataRenderer"]["tags"]
+    try:
+        tags = data[1]["microformat"]["microformatDataRenderer"]["tags"]
+    except KeyError:
+        tags = None
+    return tags
 
 
 def _countries(data):
@@ -104,8 +111,13 @@ def _is_family_safe(data):
 
 
 def _get_subscribers(data):
-    s = data[1]["header"]["c4TabbedHeaderRenderer"]["subscriberCountText"]["simpleText"]
-    return s.replace("\xa0", " ")
+    try:
+        s = data[1]["header"]["c4TabbedHeaderRenderer"]["subscriberCountText"]["simpleText"]
+        s = s.replace("\xa0", " ")
+    except KeyError:
+        s = None
+
+    return s
 
 
 def _get_channel_video(vid):
