@@ -19,6 +19,41 @@ class ChannelVideo:
 
 
 @dataclass
+class RelatedVideo:
+    id: str
+    title: str
+    channel_id: str
+    view_count: str
+
+
+@dataclass
+class Video:
+    id: str
+    channel_id: str
+    author: str
+    thumbnail_url: str
+    title: str
+    description: str
+    category: str
+    keywords: List[str] 
+    view_count: str
+    length_secs: str
+    # family_safe: bool
+    related: List[RelatedVideo]
+    crawled_at: datetime
+
+@dataclass
+class SearchVideo:
+    id: str
+    title: str
+    channel_id: str
+    views_count: str
+
+
+
+
+
+@dataclass
 class ChannelPlaylist:
     title: str
     url: str
@@ -181,6 +216,96 @@ def _get_attr(attrs, key):
                 return attr["content"]
 
 
+def _get_related_vids(data):
+    results = list(findkeys(data[2], "secondaryResults"))
+    related = []
+    for res in results[0]["secondaryResults"]["results"]:
+        _v = res.get("compactVideoRenderer")
+        if _v:
+            t = _v["longBylineText"]
+            channel_id = t["runs"][0]["navigationEndpoint"]\
+                ["browseEndpoint"]["browseId"]
+            vid = RelatedVideo(
+                id=_v["videoId"],
+                title=_v["title"]["simpleText"],
+                view_count=_v["viewCountText"]["simpleText"],
+                channel_id=channel_id,
+            )
+            related.append(vid)
+    return related
+
+def _get_vid_id(data):
+    data[0]
+    results = list(findkeys(data[0], "videoId"))
+    return results[0]
+
+def _get_vid_channel_id(data):
+    results = list(findkeys(data[0], "channelId"))
+    return results[0]
+
+def _get_vid_category(data):
+    results = list(findkeys(data[0], "category"))
+    return results[0]
+
+
+def transform_search(html):
+    soup = BS(html)
+    jdata = extract_json(soup)
+    results = jdata[1]["contents"]["twoColumnSearchResultsRenderer"]\
+        ["primaryContents"]["sectionListRenderer"]["contents"]\
+        [0]["itemSectionRenderer"]["contents"]
+    search = []
+    for r in results:
+        if r.get("videoRenderer"):
+            channel_id = r["videoRenderer"]["longBylineText"]["runs"]\
+                [0]["navigationEndpoint"]\
+                ["browseEndpoint"]["browseId"]
+            title = r["videoRenderer"]["title"]["runs"][0]["text"]
+            videoid = r["videoRenderer"]["videoId"]
+            views = r["videoRenderer"]["viewCountText"]["simpleText"]
+            sv = SearchVideo(
+                id=videoid,
+                title=title,
+                channel_id=channel_id,
+                views_count=views,
+            )
+            search.append(sv)
+    return search
+           
+           
+def transform_video(html) -> Video:
+    soup = BS(html)
+    # attrs = extract_metadata(soup)
+    jdata = extract_json(soup)
+
+    id_ = jdata[0]["videoDetails"]["videoId"]
+    channel = jdata[0]["videoDetails"]["channelId"]
+    author = jdata[0]["videoDetails"]["author"]
+    views = jdata[0]["videoDetails"]["viewCount"]
+    image = jdata[0]["videoDetails"]["thumbnail"]["thumbnails"][0]["url"]
+    keywords = jdata[0]["videoDetails"]["keywords"]
+    description = jdata[0]["videoDetails"]["shortDescription"]
+    title = jdata[0]["videoDetails"]["title"]
+    length = jdata[0]["videoDetails"]["lengthSeconds"]
+    category = _get_vid_category(jdata)
+    related = _get_related_vids(jdata)
+
+    return Video(
+        id=id_,
+        channel_id=channel,
+        author=author,
+        thumbnail_url=image,
+        title=title,
+        description=description,
+        category=category,
+        keywords=keywords,
+        view_count=views,
+        length_secs=length,
+        related=related,
+        crawled_at=datetime.utcnow(),
+        )
+
+    
 def transform_channel(html):
     soup = BS(html)
     attrs = extract_metadata(soup)
