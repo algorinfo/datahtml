@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import List, Optional, Union
 from urllib.parse import parse_qs, urlparse
 
+import feedparser
+import httpx
 from bs4 import BeautifulSoup as BS
 
 from datahtml.parsers import extract_json, extract_metadata, findkeys
@@ -35,12 +37,23 @@ class Video:
     title: str
     description: str
     category: str
-    keywords: List[str] 
+    keywords: List[str]
     view_count: str
     length_secs: str
     # family_safe: bool
     related: List[RelatedVideo]
     crawled_at: datetime
+
+
+@dataclass
+class RSSVideo:
+    id: str
+    title: str
+    description: str
+    published: str
+    thumbnail: str
+    views: str
+
 
 @dataclass
 class SearchVideo:
@@ -48,9 +61,6 @@ class SearchVideo:
     title: str
     channel_id: str
     views_count: str
-
-
-
 
 
 @dataclass
@@ -147,7 +157,9 @@ def _is_family_safe(data):
 
 def _get_subscribers(data):
     try:
-        s = data[1]["header"]["c4TabbedHeaderRenderer"]["subscriberCountText"]["simpleText"]
+        s = data[1]["header"]["c4TabbedHeaderRenderer"]["subscriberCountText"][
+            "simpleText"
+        ]
         s = s.replace("\xa0", " ")
     except KeyError:
         s = None
@@ -223,8 +235,9 @@ def _get_related_vids(data):
         _v = res.get("compactVideoRenderer")
         if _v:
             t = _v["longBylineText"]
-            channel_id = t["runs"][0]["navigationEndpoint"]\
-                ["browseEndpoint"]["browseId"]
+            channel_id = t["runs"][0]["navigationEndpoint"]["browseEndpoint"][
+                "browseId"
+            ]
             vid = RelatedVideo(
                 id=_v["videoId"],
                 title=_v["title"]["simpleText"],
@@ -234,14 +247,17 @@ def _get_related_vids(data):
             related.append(vid)
     return related
 
+
 def _get_vid_id(data):
     data[0]
     results = list(findkeys(data[0], "videoId"))
     return results[0]
 
+
 def _get_vid_channel_id(data):
     results = list(findkeys(data[0], "channelId"))
     return results[0]
+
 
 def _get_vid_category(data):
     results = list(findkeys(data[0], "category"))
@@ -249,17 +265,17 @@ def _get_vid_category(data):
 
 
 def transform_search(html):
-    soup = BS(html)
+    soup = BS(html, "lxml")
     jdata = extract_json(soup)
-    results = jdata[1]["contents"]["twoColumnSearchResultsRenderer"]\
-        ["primaryContents"]["sectionListRenderer"]["contents"]\
-        [0]["itemSectionRenderer"]["contents"]
+    results = jdata[1]["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"][
+        "sectionListRenderer"
+    ]["contents"][0]["itemSectionRenderer"]["contents"]
     search = []
     for r in results:
         if r.get("videoRenderer"):
-            channel_id = r["videoRenderer"]["longBylineText"]["runs"]\
-                [0]["navigationEndpoint"]\
-                ["browseEndpoint"]["browseId"]
+            channel_id = r["videoRenderer"]["longBylineText"]["runs"][0][
+                "navigationEndpoint"
+            ]["browseEndpoint"]["browseId"]
             title = r["videoRenderer"]["title"]["runs"][0]["text"]
             videoid = r["videoRenderer"]["videoId"]
             views = r["videoRenderer"]["viewCountText"]["simpleText"]
@@ -271,10 +287,10 @@ def transform_search(html):
             )
             search.append(sv)
     return search
-           
-           
+
+
 def transform_video(html) -> Video:
-    soup = BS(html)
+    soup = BS(html, "lxml")
     # attrs = extract_metadata(soup)
     jdata = extract_json(soup)
 
@@ -303,11 +319,11 @@ def transform_video(html) -> Video:
         length_secs=length,
         related=related,
         crawled_at=datetime.utcnow(),
-        )
+    )
 
-    
-def transform_channel(html):
-    soup = BS(html)
+
+def transform_channel(html) -> ChannelMeta:
+    soup = BS(html, "lxml")
     attrs = extract_metadata(soup)
     jdata = extract_json(soup)
 
@@ -351,5 +367,24 @@ def transform_channel(html):
     )
 
 
-def from_id2url(id_) -> str:
+def transform_rss(xml: str) -> List[RSSVideo]:
+    d = feedparser.parse(xml)
+    videos = [
+        RSSVideo(
+            id=x.yt_videoid,
+            title=x.title,
+            description=x.summary,
+            published=x.published,
+            thumbnail=x.media_thumbnail[0]["url"],
+            views=x.media_statistics["views"],
+        ) for x in d.entries
+    ]
+    return videos
+
+
+def channel_rss_from_id(id_: str):
+    return f"https://www.youtube.com/feeds/videos.xml?channel_id={id_}"
+
+
+def channel_url_from_id(id_: str) -> str:
     return f"https://www.youtube.com/channel/{id_}"

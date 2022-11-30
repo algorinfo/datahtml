@@ -20,3 +20,10 @@ def test_transform_search():
         data = f.read()
     parsed = youtube.transform_search(data)
     assert isinstance(parsed[0], youtube.SearchVideo)
+
+
+def test_transform_rss():
+    with open("tests/youtube_channel_rss.xml", "r") as f:
+        data = f.read()
+    parsed = youtube.transform_rss(data)
+    assert isinstance(parsed[0], youtube.RSSVideo)
