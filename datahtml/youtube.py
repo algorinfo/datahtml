@@ -122,8 +122,8 @@ def _get_primary_links(data):
         links = keys[0]
         for link in links:
             try:
-                l = _parse_social_link(link)
-                final.append(l)
+                sl = _parse_social_link(link)
+                final.append(sl)
             except (KeyError, IndexError):
                 pass
     return final
@@ -377,7 +377,8 @@ def transform_rss(xml: str) -> List[RSSVideo]:
             published=x.published,
             thumbnail=x.media_thumbnail[0]["url"],
             views=x.media_statistics["views"],
-        ) for x in d.entries
+        )
+        for x in d.entries
     ]
     return videos
 

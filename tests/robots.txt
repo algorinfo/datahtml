@@ -1,0 +1,13 @@
+# robots.txt for https://www.pagina12.com.ar/
+
+Sitemap: https://www.pagina12.com.ar/sitemap.xml.gz
+Sitemap: https://www.pagina12.com.ar/breakingnews.xml
+Sitemap: https://www.pagina12.com.ar/breakingnews-short.xml
+
+User-agent: *
+Disallow: /349353471/
+Disallow: /admin/
+Disallow: /andytow/
+Disallow: /apps/talk
+Disallow: /apps/zar
+
