@@ -229,22 +229,28 @@ def _get_attr(attrs, key):
 
 
 def _get_related_vids(data):
-    results = list(findkeys(data[2], "secondaryResults"))
+    """get related videos in a youtube video"""
+    results = findkeys(data, "secondaryResults")
     related = []
-    for res in results[0]["secondaryResults"]["results"]:
-        _v = res.get("compactVideoRenderer")
-        if _v:
-            t = _v["longBylineText"]
-            channel_id = t["runs"][0]["navigationEndpoint"]["browseEndpoint"][
-                "browseId"
-            ]
-            vid = RelatedVideo(
-                id=_v["videoId"],
-                title=_v["title"]["simpleText"],
-                view_count=_v["viewCountText"]["simpleText"],
-                channel_id=channel_id,
-            )
-            related.append(vid)
+    for level in results:
+        if level.get("secondaryResults"):
+            for _v in findkeys(
+                level["secondaryResults"]["results"], "compactVideoRenderer"
+            ):
+                try:
+                    t = _v["longBylineText"]
+                    channel_id = t["runs"][0]["navigationEndpoint"]["browseEndpoint"][
+                        "browseId"
+                    ]
+                    vid = RelatedVideo(
+                        id=_v["videoId"],
+                        title=_v["title"]["simpleText"],
+                        view_count=_v["viewCountText"]["simpleText"],
+                        channel_id=channel_id,
+                    )
+                    related.append(vid)
+                except KeyError:
+                    pass
     return related
 
 
@@ -293,17 +299,18 @@ def transform_video(html) -> Video:
     soup = BS(html, "lxml")
     # attrs = extract_metadata(soup)
     jdata = extract_json(soup)
+    vd = list(findkeys(jdata, "videoDetails"))[0]
 
-    id_ = jdata[0]["videoDetails"]["videoId"]
-    channel = jdata[0]["videoDetails"]["channelId"]
-    author = jdata[0]["videoDetails"]["author"]
-    views = jdata[0]["videoDetails"]["viewCount"]
-    image = jdata[0]["videoDetails"]["thumbnail"]["thumbnails"][0]["url"]
-    keywords = jdata[0]["videoDetails"]["keywords"]
-    description = jdata[0]["videoDetails"]["shortDescription"]
-    title = jdata[0]["videoDetails"]["title"]
-    length = jdata[0]["videoDetails"]["lengthSeconds"]
-    category = _get_vid_category(jdata)
+    id_ = vd["videoId"]
+    channel = vd["channelId"]
+    author = vd["author"]
+    views = vd["viewCount"]
+    image = vd["thumbnail"]["thumbnails"][0]["url"]
+    keywords = vd["keywords"]
+    description = vd["shortDescription"]
+    title = vd["title"]
+    length = vd["lengthSeconds"]
+    category = _get_vid_category(vd)
     related = _get_related_vids(jdata)
 
     return Video(
@@ -389,3 +396,7 @@ def channel_rss_from_id(id_: str):
 
 def channel_url_from_id(id_: str) -> str:
     return f"https://www.youtube.com/channel/{id_}"
+
+
+def video_url_from_id(id_: str) -> str:
+    return f"https://www.youtube.com/watch?v={id_}"
