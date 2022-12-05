@@ -38,18 +38,19 @@ class AxiosCrawler(CrawlerSpec):
         """
         self._url = url or os.getenv("AXIOS_URL")
         self._token = token or os.getenv("AXIOS_TOKEN")
+        self._headers = {"Authorization": f"Bearer {self._token}"}
 
     def get(
-        self, url, headers: Optional[Dict[str, Any]] = {},
-            timeout_secs: int = 60
+        self, url, headers: Optional[Dict[str, Any]] = {}, timeout_secs: int = 60
     ) -> CrawlResponse:
+        # TODO: fix if something fail on the crawler service
 
         try:
             r = httpx.post(
                 self._url,
                 data={"url": url, "headers": headers},
+                headers=self._headers,
                 timeout=timeout_secs,
-                follow_redirects=True,
             )
             data = r.json()
             rsp = CrawlResponse(
