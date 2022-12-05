@@ -266,7 +266,7 @@ def _get_vid_channel_id(data):
 
 
 def _get_vid_category(data):
-    results = list(findkeys(data[0], "category"))
+    results = list(findkeys(data, "category"))
     return results[0]
 
 
@@ -310,7 +310,7 @@ def transform_video(html) -> Video:
     description = vd["shortDescription"]
     title = vd["title"]
     length = vd["lengthSeconds"]
-    category = _get_vid_category(vd)
+    category = _get_vid_category(jdata)
     related = _get_related_vids(jdata)
 
     return Video(
