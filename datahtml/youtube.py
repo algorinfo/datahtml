@@ -306,7 +306,7 @@ def transform_video(html) -> Video:
     author = vd["author"]
     views = vd["viewCount"]
     image = vd["thumbnail"]["thumbnails"][0]["url"]
-    keywords = vd["keywords"]
+    keywords = vd.get("keywords", [])
     description = vd["shortDescription"]
     title = vd["title"]
     length = vd["lengthSeconds"]
