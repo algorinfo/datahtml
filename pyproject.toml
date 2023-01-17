@@ -55,6 +55,7 @@ dependencies = [
   "Sphinx~=5.3.0",
   "sphinx-autobuild",
   "furo", # sphinx theme
+  "ipython"
 ]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=datahtml --cov=tests {args}"
