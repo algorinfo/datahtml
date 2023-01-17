@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional, Union
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlparse, quote
 
 import feedparser
 import httpx
@@ -400,3 +400,8 @@ def channel_url_from_id(id_: str) -> str:
 
 def video_url_from_id(id_: str) -> str:
     return f"https://www.youtube.com/watch?v={id_}"
+
+
+def text2search_url(txt: str) -> str:
+    words = txt.replace(" ", "+")
+    return f"https://www.youtube.com/results?search_query={words}"
