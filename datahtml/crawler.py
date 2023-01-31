@@ -55,7 +55,7 @@ class AxiosCrawler(CrawlerSpec):
             data = r.json()
             rsp = CrawlResponse(
                 url=url,
-                headers=data["headers"],
+                headers=data.get("headers", {}),
                 status_code=data["status"],
                 content=data["content"],
             )
