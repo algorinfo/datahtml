@@ -54,7 +54,8 @@ dependencies = [
   "black-macchiato", # for partial update of buffers in emacs
   "Sphinx~=5.3.0",
   "sphinx-autobuild",
-  "furo", # sphinx theme
+  # "furo", # sphinx theme
+  "sphinx-rtd-theme",
   "ipython"
 ]
 [tool.hatch.envs.default.scripts]
