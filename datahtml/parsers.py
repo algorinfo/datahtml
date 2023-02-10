@@ -22,7 +22,7 @@ def _proc_soup_link(s_link, url: types.URL) -> types.Link:
         protocol = "http"
         if url.secure:
             protocol = "https"
-        href = f"{protocol}://{url.netloc}/{parsed.path}"
+        href = f"{protocol}://{url.netloc}{parsed.path}"
     if url.domain_base in href:
         internal = True
 
@@ -181,7 +181,6 @@ def extract_links(soup: BS, fullurl: str) -> List[types.Link]:
 
 
 def extract_images(soup: BS) -> List[types.Image]:
-
     images = [
         types.Image(alt=x.get("alt", ""), src=x.get("src", ""))
         for x in soup.findAll("img")

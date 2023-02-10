@@ -22,6 +22,7 @@ Under the hood datahtml uses libraries like BeautifoulSoup, Newspaper2k, feedpar
    :maxdepth: 2
    :caption: Contents:
 
+   api_reference
 
 
 Indices and tables

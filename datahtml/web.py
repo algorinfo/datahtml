@@ -5,8 +5,20 @@ from datahtml._utils import difference_from_now
 from datahtml.base import CrawlerSpec
 
 
-class Web:
-    def __init__(self, url, *, html_txt, is_root=False):
+class WebDocument:
+    """
+    It's the main object for the library. It represents a HTML Document.
+    This page could be a root link or a subpage.
+    """
+    def __init__(self, url: str, *, html_txt: str, is_root=False):
+        """
+        :param url: url where the document belongs.
+        :type url: str
+        :param html_txt: html text of the document.
+        :type html_txt: str
+        :param is_root: if is the root site or a subpage.
+        :type is_root: bool
+        """
         self.url: types.URL = parsers.parse_url(url)
         self._html = html_txt
         self.soup = parsers.text2soup(html_txt)
@@ -19,13 +31,20 @@ class Web:
         *,
         crawler: CrawlerSpec,
         is_root=False,
-    ) -> "Web":
+    ) -> "WebDocument":
+        """
+        It crawl and parse a url passed.
+
+        .. deprecated:: 0.3.0
+           Use :func:`datahtml.web.download`
+
+        """
         rsp = crawler.get(url)
         obj = cls(url=url, html_txt=rsp.text, is_root=is_root)
         return obj
 
     def links(self) -> List[types.Link]:
-        links = parsers.extract_links(self.soup, fullurl=self.url.fullurl)
+        links = parsers.extract_links(self.soup, fullurl=self.url.fullurl.strip("/"))
         return links
 
     def images(self) -> List[types.Image]:
@@ -40,8 +59,14 @@ class Web:
         return parsers.extract_meta_og(self.soup, meta=keys)
 
     def article(self) -> news.ArticleData:
-        ad = news.ArticleData.from_html(url=self.url, html=self._html)
+        ad = news.ArticleData.from_html(url=self.url.fullurl, html=self._html)
         return ad
+
+    def __repr__(self):
+        return f"<WebDocument '{self.url.fullurl}'>"
+
+    def __str__(self):
+        return f"<WebDocument '{self.url.fullurl}'>"
 
 
 def download(
@@ -49,16 +74,42 @@ def download(
     *,
     crawler: CrawlerSpec,
     is_root=True,
-) -> Web:
+) -> WebDocument:
+    """
+    It crawls the url passed.
+
+    :param url: url to crawl
+    :type url: str
+    :param crawler: A class:`CrawlerSpec` implementation.
+    :type crawler: CrawlerSpec
+    :param is_root: if it's a root site or not.
+    :type is_root: bool
+    :return: A web object.
+    :rtype: WebDocument
+    """
     rsp = crawler.get(url)
-    w = Web(url=url, html_txt=rsp.text, is_root=is_root)
+    w = WebDocument(url=url, html_txt=rsp.text, is_root=is_root)
     return w
 
 
 def build_sitemap(
-    url, *, crawler: CrawlerSpec, filter_dt=1
+    url: str, *, crawler: CrawlerSpec, filter_dt: int = 1
 ) -> List[sitemap.SitemapLink]:
-    rsp_txt = crawler.get(f"{url.strip()}/robots.txt")
+    """
+    It try to get the sitemap of the site based on the robots.txt protocol.
+    After finding sitemaps links, it starts crawling each link.
+
+    :param url: Base url of the site
+    :type url: str
+    :param crawler: A crawler based on the :class:`CrawlerSpec`
+    :type crawler: CrawlerSpec
+    :param filter_dt: some sites could have a lot of sitemaps and links,
+        like media site, `filter_dt` helps to filter old content.
+
+    :return: A list of links extracted from the sitemaps.
+    :rtype: List[sitemap.SitemapLink]
+    """
+    rsp_txt = crawler.get(f"{url.strip('/')}/robots.txt")
     sitesmaps = sitemap.get_sitemaps_from_robots(rsp_txt.text)
 
     total_sites = []
@@ -78,7 +129,6 @@ def build_sitemap(
                     diff = difference_from_now(site2.lastmod.text)
                     if diff.days <= filter_dt:
                         _w = download(site2.loc.text, crawler=crawler)
-                        # _w = Web.parse(site2.loc.text, crawler=crawler)
                         if _w.soup:
                             _urls = _w.soup.findAll("url")
                             sites = sitemap.parse_sitemap_links(_urls)
@@ -88,23 +138,31 @@ def build_sitemap(
     return total_sites
 
 
-def find_rss_links(url, *, crawler: CrawlerSpec, web: Web = None) -> List[rss.RSSLink]:
-    """Main method, it will scrap from the url provided looking for links related
-    to rss feed. If it found rss links then, it will try to get the feed.
+def find_rss_links(
+    url: str, *, crawler: CrawlerSpec, web: WebDocument = None
+) -> List[rss.RSSLink]:
+    """
+    It will scrap the url, looking for links related to rss feeds.
+    If it found rss links, then it will try to get the feed from those urls.
+
+    :param url: base url to crawl, it should be the root url.
+    :type url: str
+    :param crawler: class:`CrawlerSpec` implementation to be used
+    :type crawler: CrawlerSpec
+    :param web: Optional, if a class:`WebDocument`  object is passed, then it wouldn't
+        crawl the site.
+    :return: A list of RSS link already parsed.
+    :rtype: List[rss.RSSLink]
     """
     _rss: List[rss.RSSLink] = []
     _urls = set()
     _parsed = set()
-    # breakpoint()
-    # print(url)
-    # w = Web.parse(url=url, crawler=crawler)
+
     w = web or download(url=url, crawler=crawler)
 
     rss_links = rss.find_rss_realated_links(w.links())
     for x in rss_links:
         if x not in _parsed:
-            # print(x)
-            # req = fetch.from_url(x)
             try:
                 possible = crawler.get(x)
                 _parsed.add(x)
@@ -114,7 +172,7 @@ def find_rss_links(url, *, crawler: CrawlerSpec, web: Web = None) -> List[rss.RS
                         _urls.add(x)
                         _rss.append(rss.RSSLink(url=x, xmlcontent=possible.text))
                 else:
-                    w2 = Web(x, html_txt=possible.text)
+                    w2 = WebDocument(x, html_txt=possible.text)
                     rss_links2 = rss.find_rss_realated_links(w2.links())
                     for y in rss_links2:
                         if y not in _parsed:
