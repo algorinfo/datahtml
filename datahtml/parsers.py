@@ -1,7 +1,6 @@
 import json
 import re
-from dataclasses import dataclass
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup as BS

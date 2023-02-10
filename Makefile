@@ -4,6 +4,6 @@
 #	hatch shell
 
 .PHONY: docs-serve
-docss:
+docs-serve:
 	hatch run sphinx-autobuild docs docs/_build/html --port 9292 --watch ./
 
