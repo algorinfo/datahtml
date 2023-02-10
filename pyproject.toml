@@ -7,7 +7,7 @@ name = "datahtml"
 description = 'A lib to work with html and web data'
 readme = "README.md"
 requires-python = ">=3.7"
-license = "MIT"
+license = "MPL-2.0"
 keywords = []
 authors = [
   { name = "Xavier Petit", email = "nuxion@gmail.com" },
