@@ -32,6 +32,8 @@ dependencies = [
 	# "reppy~=0.4.14",
 	"newspaper3k~=0.2.8",
 	"httpx~=0.23.0",
+        "pydantic~=1.10.7"
+        
 ]
 dynamic = ["version"]
 
@@ -47,6 +49,8 @@ path = "datahtml/__about__.py"
 dependencies = [
   "pytest",
   "pytest-cov",
+  "pytest-asyncio",
+  "mypy~=1.0.1",
   "pip-tools",
   "isort",
   "pylint>2.6.0", # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#id4
