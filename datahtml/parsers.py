@@ -208,3 +208,13 @@ def findkeys(node, kv):
         for j in node.values():
             for x in findkeys(j, kv):
                 yield x
+
+def meta_keywords(soup: BS) -> str:
+    data = extract_metadata(soup)
+    keywords = ""
+    for d in data:
+        if d.get("property"):
+            if d["property"] == "keywords":
+                keywords = d["content"]
+                break
+    return keywords
