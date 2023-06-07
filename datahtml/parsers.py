@@ -31,7 +31,7 @@ def _proc_soup_link(s_link, url: types.URL) -> types.Link:
     )
 
 
-def _is_social(base_url, socials):
+def is_social(base_url, socials):
     # print(_u)
     for s in socials:
         if s in base_url:
@@ -114,8 +114,14 @@ def url_norm(url, trailing=True):
         url_short = url_short.strip("/")
     return fullurl, url_short
 
+def get_domain_base(url: str) -> str:
+    url_regex = re.findall(URL_REGEX, url)
+    if not url_regex:
+        raise errors.URLParsingError(url)
+    domain = url_regex[0][1]
+    return str(domain)
 
-def parse_url(url: str) -> types.URL:
+def parse_url(url: str, socials_url=SOCIALS_COM) -> types.URL:
     """Parse a url string to URL.
     URL_REGEX return a tuple with 3 values:
     (protocol, netloc, path)
@@ -140,7 +146,7 @@ def parse_url(url: str) -> types.URL:
         domain_base = _www[1]
         netloc = netloc.split("www.")[1]
 
-    is_social = _is_social(domain_base, SOCIALS_COM)
+    _is_social = is_social(domain_base, socials_url)
     is_secure = protocol == "https"
     tld = domain.split(".")[-1]
 
@@ -150,7 +156,7 @@ def parse_url(url: str) -> types.URL:
         domain_base=domain_base,
         netloc=_u.netloc,
         path=path,
-        is_social=is_social,
+        is_social=_is_social,
         secure=is_secure,
         www=www,
         tld=tld,

@@ -44,6 +44,15 @@ class WebDocument:
         obj = cls(url=url, html_txt=rsp.text, is_root=is_root)
         return obj
 
+    def social_urls(self) -> List[types.URL]:
+        _socials = []
+        for l in self.links():
+            if not l.internal:
+                _url = parsers.parse_url(l.href)
+                if _url.is_social:
+                    _socials.append(_url)
+        return _socials
+
     def links(self) -> List[types.Link]:
         links = parsers.extract_links(self.soup, fullurl=self.url.fullurl.strip("/"))
         return links
@@ -85,7 +94,7 @@ class WebDocument:
         l = self.soup.html.get("lang")
         og_l = self.meta_og(keys=["og:locale"])
         if og_l:
-            locale =  og_l["locale"]
+            locale = og_l["locale"]
         elif l:
             locale = l
         return locale

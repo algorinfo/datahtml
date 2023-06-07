@@ -16,9 +16,11 @@ SOCIALS_COM = [
     "meetup.com",
     "linkedin.com",
     "books.google.com",
-    "bit.ly"
+    "bit.ly",
+    "apps.apple.com",
+    "play.google.com",
 ]
 
 WORDS_REGEX = re.compile(r'\b[A-Za-z]+\b')
-OG_KEYS = ["og:url", "og:image", "og:description", "og:type", "og:locale"]
+OG_KEYS = ["og:url", "og:image", "og:description", "og:type", "og:locale", "og:title"]
 
