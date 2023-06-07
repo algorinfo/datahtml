@@ -32,7 +32,7 @@ class CrawlResponse:
 
     @property
     def is_xml(self):
-        if "text/xml" in self.headers["content-type"]:
+        if "xml" in self.headers["content-type"]:
             return True
         return False
 
