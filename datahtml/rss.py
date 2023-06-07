@@ -1,12 +1,13 @@
 import logging
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 import feedparser
 from dateutil.parser import parse as dtparser
 
 from datahtml import errors, types
 from datahtml.base import CrawlerSpec
+
 # from datahtml.web import Web
 
 
@@ -57,6 +58,11 @@ def parse(xmlcontent: str) -> List[Entry]:
             pass
 
     return entries
+
+
+def parse_as_dict(xmlcontent: str) -> List[Dict[str, Any]]:
+    feed = feedparser.parse(xmlcontent)
+    return feed["entries"]
 
 
 def find_rss_realated_links(links: List[types.Link]):
