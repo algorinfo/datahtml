@@ -36,3 +36,8 @@ class Image:
     alt: str
     src: str
 
+@dataclass
+class MetaTag:
+    key: str
+    value: str
+    

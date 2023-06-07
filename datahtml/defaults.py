@@ -20,5 +20,5 @@ SOCIALS_COM = [
 ]
 
 WORDS_REGEX = re.compile(r'\b[A-Za-z]+\b')
-
+OG_KEYS = ["og:url", "og:image", "og:description", "og:type", "og:locale"]
 

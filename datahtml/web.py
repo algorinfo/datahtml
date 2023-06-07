@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Union
 
-from datahtml import errors, news, parsers, rss, sitemap, types
+from datahtml import defaults, errors, news, parsers, rss, sitemap, types
 from datahtml._utils import difference_from_now
 from datahtml.base import CrawlerSpec
 
@@ -10,6 +10,7 @@ class WebDocument:
     It's the main object for the library. It represents a HTML Document.
     This page could be a root link or a subpage.
     """
+
     def __init__(self, url: str, *, html_txt: str, is_root=False):
         """
         :param url: url where the document belongs.
@@ -53,14 +54,41 @@ class WebDocument:
     def ld_json(self) -> Dict[str, Any]:
         return parsers.extract_ld_json(self.soup)
 
-    def meta_og(
-        self, keys=["og:url", "og:image", "og:description", "og:type"]
-    ) -> Dict[str, str]:
+    def meta_og(self, keys=defaults.OG_KEYS) -> Dict[str, str]:
         return parsers.extract_meta_og(self.soup, meta=keys)
 
     def article(self) -> news.ArticleData:
         ad = news.ArticleData.from_html(url=self.url.fullurl, html=self._html)
         return ad
+
+    def keywords(self) -> Union[str, None]:
+        k = None
+        for m in self.soup.find_all("meta"):
+            p = m.get("property")
+            if p and p == "keywords":
+                k = m.get("content")
+        return k
+
+    def metas(self) -> List[types.MetaTag]:
+        metas = []
+        for m in self.soup.find_all("meta"):
+            if m.get("content") and m.get("property"):
+                _mt = types.MetaTag(key=m.get("property"), value=m.get("content"))
+                metas.append(_mt)
+            elif m.get("content") and m.get("name"):
+                _mt = types.MetaTag(key=m.get("name"), value=m.get("content"))
+                metas.append(_mt)
+        return metas
+
+    def get_locale(self) -> Union[str, None]:
+        locale = None
+        l = self.soup.html.get("lang")
+        og_l = self.meta_og(keys=["og:locale"])
+        if og_l:
+            locale =  og_l["locale"]
+        elif l:
+            locale = l
+        return locale
 
     def __repr__(self):
         return f"<WebDocument '{self.url.fullurl}'>"
