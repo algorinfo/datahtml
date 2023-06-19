@@ -24,3 +24,11 @@ class RobotsTxtNotFound(Exception):
     def __init__(self, url):
         msg = f"robots.txt file not found for {url}"
         super().__init__(msg)
+
+
+class CrawlingError(Exception):
+    def __init__(self, url, status):
+        msg = f"Error crawling url {url} with status {status}"
+        super().__init__(msg)
+
+

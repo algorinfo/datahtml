@@ -111,6 +111,7 @@ def download(
     *,
     crawler: CrawlerSpec,
     is_root=True,
+    raise_when_not_200=True,
 ) -> WebDocument:
     """
     It crawls the url passed.
@@ -125,6 +126,9 @@ def download(
     :rtype: WebDocument
     """
     rsp = crawler.get(url)
+    if raise_when_not_200 and rsp.status_code != 200:
+        raise errors.CrawlingError(url=url, status=rsp.status_code)
+
     w = WebDocument(url=url, html_txt=rsp.text, is_root=is_root)
     return w
 
