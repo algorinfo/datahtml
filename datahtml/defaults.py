@@ -20,7 +20,8 @@ SOCIALS_COM = [
     "apps.apple.com",
     "play.google.com",
 ]
-
+WIKI_API = "https://www.wikidata.org/w/api.php"
+NITTER_RSS = "https://nitter.net"
 WORDS_REGEX = re.compile(r'\b[A-Za-z]+\b')
 OG_KEYS = ["og:url", "og:image", "og:description", "og:type", "og:locale", "og:title"]
 
