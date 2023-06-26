@@ -224,3 +224,11 @@ def meta_keywords(soup: BS) -> str:
                 keywords = d["content"]
                 break
     return keywords
+
+def proxyconf2url(p: types.ProxyConf) -> str:
+    url = p.server
+    if p.username:
+        parsed = urlparse(p.server)
+        url = f"{parsed.scheme}://{p.username}:{p.password}@{parsed.netloc}"
+    return url
+    

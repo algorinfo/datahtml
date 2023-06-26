@@ -3,23 +3,43 @@ from typing import Any, Dict, Optional
 
 import httpx
 
-from datahtml import errors
+from datahtml import errors, types
 from datahtml.base import CrawlerSpec, CrawlResponse
+from datahtml.parsers import proxyconf2url
 
 # import traceback
 
 
 class LocalCrawler(CrawlerSpec):
     def get(
-        self, url, headers: Optional[Dict[str, Any]] = {}, timeout_secs: int = 60
+        self,
+        url,
+        headers: Optional[Dict[str, Any]] = None,
+        timeout_secs: int = 60,
+        proxy: Optional[types.ProxyConf] = None,
     ) -> CrawlResponse:
 
+        client = httpx.Client(
+            headers=headers, timeout=timeout_secs, follow_redirects=True
+        )
+        if proxy:
+            proxy_url = proxyconf2url(proxy)
+            client = httpx.Client(
+                headers=headers,
+                timeout=timeout_secs,
+                follow_redirects=True,
+                proxies={"all://": proxy_url},
+            )
+
         try:
-            r = httpx.get(
+            r = client.get(
                 url, headers=headers, timeout=timeout_secs, follow_redirects=True
             )
             rsp = CrawlResponse(
-                url=url, headers=r.headers, status_code=r.status_code, content=r.content
+                url=url,
+                headers=dict(r.headers),
+                status_code=r.status_code,
+                content=r.content,
             )
             return rsp
         except httpx.HTTPError as e:
@@ -41,7 +61,11 @@ class AxiosCrawler(CrawlerSpec):
         self._headers = {"Authorization": f"Bearer {self._token}"}
 
     def get(
-        self, url, headers: Optional[Dict[str, Any]] = {}, timeout_secs: int = 60
+        self,
+        url,
+        headers: Optional[Dict[str, Any]] = None,
+        timeout_secs: int = 60,
+        proxy: Optional[types.ProxyConf] = None,
     ) -> CrawlResponse:
         # TODO: fix if something fail on the crawler service
 

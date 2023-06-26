@@ -1,4 +1,8 @@
+import os
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
+
+from attr import asdict, define
 
 
 @dataclass
@@ -36,8 +40,26 @@ class Image:
     alt: str
     src: str
 
+
 @dataclass
 class MetaTag:
     key: str
     value: str
-    
+
+
+@define
+class ProxyConf:
+    server: str
+    username: Optional[str] = None
+    password: Optional[str] = None
+
+    def dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_env(cls) -> "ProxyConf":
+        return cls(
+            server=os.environ["PROXY_SERVER"],
+            username=os.getenv("PROXY_USER", None),
+            password=os.getenv("PROXY_PASS"),
+        )

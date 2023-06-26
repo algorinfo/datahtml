@@ -2,6 +2,8 @@ import json
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
+from datahtml.types import ProxyConf
+
 
 class CrawlResponse:
     def __init__(
@@ -42,10 +44,20 @@ class CrawlResponse:
             return True
         return False
 
+    def __str__(self):
+        return f"<CrawlResponse {self.url} {self.status_code}>"
+
+    def __repr__(self):
+        return f"<CrawlResponse {self.url} {self.status_code}>"
+
 
 class CrawlerSpec(ABC):
     @abstractmethod
     def get(
-        self, url, headers: Optional[Dict[str, Any]] = None, timeout_secs: int = 60
+        self,
+        url,
+        headers: Optional[Dict[str, Any]] = None,
+        timeout_secs: int = 60,
+        proxy: Optional[ProxyConf] = None,
     ) -> CrawlResponse:
         pass
