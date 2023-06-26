@@ -48,9 +48,13 @@ class WebDocument:
         _socials = []
         for l in self.links():
             if not l.internal:
-                _url = parsers.parse_url(l.href)
-                if _url.is_social:
-                    _socials.append(_url)
+                try:
+                    _url = parsers.parse_url(l.href)
+                    if _url.is_social:
+                        _socials.append(_url)
+                except errors.URLParsingError:
+                    pass
+
         return _socials
 
     def links(self) -> List[types.Link]:
