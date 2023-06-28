@@ -52,12 +52,22 @@ class CrawlResponse:
 
 
 class CrawlerSpec(ABC):
+    proxy: Optional[ProxyConf]
+
     @abstractmethod
     def get(
         self,
         url,
         headers: Optional[Dict[str, Any]] = None,
         timeout_secs: int = 60,
-        proxy: Optional[ProxyConf] = None,
+    ) -> CrawlResponse:
+        pass
+
+    @abstractmethod
+    async def aget(
+        self,
+        url,
+        headers: Optional[Dict[str, Any]] = None,
+        timeout_secs: int = 60,
     ) -> CrawlResponse:
         pass

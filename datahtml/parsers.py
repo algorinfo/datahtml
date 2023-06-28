@@ -114,12 +114,14 @@ def url_norm(url, trailing=True):
         url_short = url_short.strip("/")
     return fullurl, url_short
 
+
 def get_domain_base(url: str) -> str:
     url_regex = re.findall(URL_REGEX, url)
     if not url_regex:
         raise errors.URLParsingError(url)
     domain = url_regex[0][1]
     return str(domain)
+
 
 def parse_url(url: str, socials_url=SOCIALS_COM) -> types.URL:
     """Parse a url string to URL.
@@ -215,6 +217,7 @@ def findkeys(node, kv):
             for x in findkeys(j, kv):
                 yield x
 
+
 def meta_keywords(soup: BS) -> str:
     data = extract_metadata(soup)
     keywords = ""
@@ -225,10 +228,11 @@ def meta_keywords(soup: BS) -> str:
                 break
     return keywords
 
+
 def proxyconf2url(p: types.ProxyConf) -> str:
     url = p.server
     if p.username:
         parsed = urlparse(p.server)
         url = f"{parsed.scheme}://{p.username}:{p.password}@{parsed.netloc}"
     return url
-    
+

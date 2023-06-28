@@ -7,6 +7,8 @@ from datahtml.defaults import WIKI_API
 
 # based on
 # https://www.jcchouinard.com/wikidata-api-python/
+# wiki pages
+# https://www.wikidata.org/wiki/Q9684
 
 ENTS = {
     "Q5": "Person",
