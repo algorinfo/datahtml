@@ -2,7 +2,7 @@ from typing import Dict, List, Optional, Any
 
 from datahtml import rss, web
 from datahtml.base import CrawlerSpec
-from datahtml.errors import URLParsingError
+from datahtml.errors import URLParsingError, XMLContentNotFound
 from datahtml.parsers import parse_url, text_from_link
 from datahtml.sitemap import SitemapLink
 from datahtml.types import Link
@@ -96,9 +96,18 @@ def extract_links(
     fullurl: str,
     crawler: CrawlerSpec,
     from_html=True,
-    from_rss=True,
+    from_rss=None,
     from_sitemap=False,
 ) -> List[LinkMerged]:
+    """
+    Extract links from different sources.
+
+    :param fullurl: usually the root url where we want to get links
+    :param crawler: instance of CrawlerSpec
+    :param from_html: True if you want to include links from the html source
+    :param from_rss: The url of a feed rss to download
+    :param from_sitemap: True if you want also get links from the sitemap
+    """
     w = None
     if from_html:
         w = web.download(fullurl, crawler=crawler)
@@ -108,6 +117,9 @@ def extract_links(
         smap = web.build_sitemap(fullurl, crawler=crawler)
     rss_data = None
     if from_rss:
-        rss_data = rss.download(fullurl, crawler=crawler)
+        try:
+            rss_data = rss.download(from_rss, crawler=crawler)
+        except XMLContentNotFound:
+            pass
     links = links_mapping(smap, w, rss_data)
     return links
