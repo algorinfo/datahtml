@@ -31,4 +31,11 @@ class CrawlingError(Exception):
         msg = f"Error crawling url {url} with status {status}"
         super().__init__(msg)
 
+class XMLContentNotFound(Exception):
+    def __init__(self, url):
+        msg = f"The response of {url} is not xml"
+        super().__init__(msg)
+
+
+
 

@@ -125,3 +125,13 @@ class WKEntityExtra:
 
     def dict(self) -> Dict[str, Any]:
         return asdict(self)
+
+@define
+class LinkMerged:
+    fullurl: str
+    urlnorm: str
+    source: str
+    text: str
+    text_path: str
+    title: Optional[str] = None
+    lastmod: Optional[str] = None

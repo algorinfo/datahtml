@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 import feedparser
 from dateutil.parser import parse as dtparser
@@ -71,3 +71,32 @@ def find_rss_realated_links(links: List[types.Link]):
         if link.internal and "rss" in link.href or "feed" in link.href:
             rss_links.add(link.href)
     return rss_links
+
+
+def download_as_dict(url, *, crawler: CrawlerSpec) -> List[Dict[str, Any]]:
+    """
+    Get and parse the rss feed from a URL.
+
+    IT returns a dict which is very close to the original parsed feed using
+    the feedparser library.
+    """
+    rsp = crawler.get(url)
+    if not rsp.is_xml:
+        raise errors.XMLContentNotFound(url)
+
+    data = parse_as_dict(rsp.text)
+    return data
+
+
+def download(url, *, crawler: CrawlerSpec) -> List[Entry]:
+    """
+    Get and parse the rss feed from a URL.
+
+    It returns a list of Entry
+    """
+    rsp = crawler.get(url)
+    if not rsp.is_xml:
+        raise errors.XMLContentNotFound(url)
+
+    data = parse(rsp.text)
+    return data
