@@ -1,13 +1,30 @@
 import os
 from typing import Any, Dict, Optional
+from urllib.parse import urlparse
 
 import httpx
 
-from datahtml import errors, types, defaults
+from datahtml import defaults, errors, types
 from datahtml.base import CrawlerSpec, CrawlResponse
-from datahtml.parsers import proxyconf2url
 
 # import traceback
+
+
+def proxyconf2url(p: types.ProxyConf) -> str:
+    url = p.server
+    if p.username:
+        parsed = urlparse(p.server)
+        url = f"{parsed.scheme}://{p.username}:{p.password}@{parsed.netloc}"
+    return url
+
+def proxyconf_from_env() -> types.ProxyConf:
+    _user = os.getenv("PROXY_USER") or  os.getenv("PROXY_USERNAME")
+    _pass = os.getenv("PROXY_PASS") or  os.getenv("PROXY_PASSWORD")
+    return types.ProxyConf(
+        server=os.environ["PROXY_SERVER"],
+        username=_user,
+        password=_pass
+    )
 
 
 class LocalCrawler(CrawlerSpec):
@@ -21,7 +38,7 @@ class LocalCrawler(CrawlerSpec):
         timeout_secs: int = 60,
     ) -> CrawlResponse:
         if not headers:
-            headers={"User-Agent": defaults.AGENT}
+            headers = {"User-Agent": defaults.AGENT}
 
         client = httpx.Client(
             headers=headers, timeout=timeout_secs, follow_redirects=True
@@ -63,7 +80,7 @@ class LocalCrawler(CrawlerSpec):
             headers=headers, timeout=timeout_secs, follow_redirects=True
         )
         if not headers:
-            headers={"User-Agent": defaults.AGENT}
+            headers = {"User-Agent": defaults.AGENT}
         if self.proxy:
             proxy_url = proxyconf2url(self.proxy)
             client = httpx.AsyncClient(
@@ -89,8 +106,6 @@ class LocalCrawler(CrawlerSpec):
             raise errors.CrawlHTTPError(str(e))
         finally:
             await client.aclose()
-
-
 
 
 class AxiosCrawler(CrawlerSpec):
