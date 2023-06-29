@@ -102,7 +102,14 @@ def extract_json(soup: BS) -> List[Dict[str, Any]]:
 
 def url_norm(url, trailing=True):
     """
-    Strip slashes.
+    Normalize an URL. It returns a tuple with the fullurl
+    without trailing slashes, and a url_short version without
+    protocols, query params and so on... only domain and path.
+
+    For instance:
+    u2 = "https://www.google.com/test?query=testq"
+    it should returns:
+    (https://www.google.com/test, www.google.com/test)
     """
     _u = urlparse(url)
     # netloc = _u.netloc.strip("/")
@@ -125,6 +132,8 @@ def get_domain_base(url: str) -> str:
 
 def parse_url(url: str, socials_url=SOCIALS_COM) -> types.URL:
     """Parse a url string to URL.
+
+    For developers:
     URL_REGEX return a tuple with 3 values:
     (protocol, netloc, path)
     """
