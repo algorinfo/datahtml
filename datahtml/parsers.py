@@ -45,7 +45,7 @@ def text_from_link(link: str) -> str:
     >> text_from_link("https://www.pe.com/morales-y-bullrich-reeditaron-los-reproches-y-profundizaron-las-diferencias-sobre-el-rumbo-de-jxc.phtml")
     >> 'morales y bullrich reeditaron los reproches y profundizaron las diferencias sobre el rumbo de jxc'
     """
-    u = urlparse(link)
+    u = urlparse(link.strip("/"))
     _path = u.path.split(".")[0]
     between_path = _path.split("/")
     last_path = between_path[-1]

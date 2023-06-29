@@ -5,6 +5,10 @@ u2 = "https://www.google.com/test?query=testq"
 u3 = "http://google.com"
 u4 = "https://google.com.ar"
 
+u5 = "https://www.infobae.com/politica/2023/06/29/crece-la-tension-diplomatica-valdes-afirmo-que-paraguay-hostiga-a-pescadores-argentinos-y-pidio-la-intervencion-de-cancilleria/"
+u6 = "https://www.pe.com/morales-y-bullrich-reeditaron-los-reproches-y-profundizaron-las-diferencias-sobre-el-rumbo-de-jxc.phtml"
+u7 = "https://www.infobae.com/leamos/2023/06/29/los-dias-que-victoria-ocampo-estuvo-presa-por-antiperonista-usted-no-tiene-derecho-a-nada/"
+
 def test_parsers_parse_url():
     r1 = parsers.parse_url(u1)
     r2 = parsers.parse_url(u2)
@@ -27,3 +31,12 @@ def test_parsers_url_norm():
 
     assert r1 == "www.google.com"
     assert r2 == "www.google.com/test"
+
+def test_parsers_text_from_link():
+    t1 = parsers.text_from_link(u5)
+    t2 = parsers.text_from_link(u6)
+    t3 = parsers.text_from_link(u7)
+
+    assert "argentinos" in u5
+    assert "reproches" in u6
+    assert "derecho" in u7
