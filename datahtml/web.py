@@ -159,27 +159,31 @@ def build_sitemap(
 
     total_sites = []
     for site in sitesmaps:
-        w = download(site, crawler=crawler)
-        urls = w.soup.findAll("url")
-        if urls:
-            sites = sitemap.parse_sitemap_links(urls)
-            total_sites.extend(sites)
-        else:
-            # breakpoint()
-            # locs = s.findAll("loc")
-            # for l in locs:
-            xmlsites = w.soup.findAll("sitemap")
-            for site2 in xmlsites:
-                try:
-                    diff = difference_from_now(site2.lastmod.text)
-                    if diff.days <= filter_dt:
-                        _w = download(site2.loc.text, crawler=crawler)
-                        if _w.soup:
-                            _urls = _w.soup.findAll("url")
-                            sites = sitemap.parse_sitemap_links(_urls)
-                            total_sites.extend(sites)
-                except AttributeError:
-                    pass
+        try:
+            w = download(site, crawler=crawler)
+            urls = w.soup.findAll("url")
+            if urls:
+                sites = sitemap.parse_sitemap_links(urls)
+                total_sites.extend(sites)
+            else:
+                # breakpoint()
+                # locs = s.findAll("loc")
+                # for l in locs:
+                xmlsites = w.soup.findAll("sitemap")
+                for site2 in xmlsites:
+                    try:
+                        diff = difference_from_now(site2.lastmod.text)
+                        if diff.days <= filter_dt:
+                            _w = download(site2.loc.text, crawler=crawler)
+                            if _w.soup:
+                                _urls = _w.soup.findAll("url")
+                                sites = sitemap.parse_sitemap_links(_urls)
+                                total_sites.extend(sites)
+                    except AttributeError:
+                        pass
+        except errors.CrawlingError:
+            pass
+                        
     return total_sites
 
 
