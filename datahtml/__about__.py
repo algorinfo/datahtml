@@ -1,4 +1,4 @@
 # SPDX-FileCopyrightText: 2022-present nuxion <nuxion@gmail.com>
 #
 # SPDX-License-Identifier: MIT
-__version__ = '0.4.0rc9'
+__version__ = '0.4.0rc10'
