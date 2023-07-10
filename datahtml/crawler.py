@@ -277,7 +277,7 @@ class ChromeV4(CrawlerSpec):
         return rsp
 
 
-def default_chrome(url_service) -> ChromeV4:
+def default_chrome(*, service, token) -> ChromeV4:
     cf = ChromeConfig()
-    c = ChromeV4(config=cf, url=url_service)
+    c = ChromeV4(config=cf, url=service, token=token)
     return c
