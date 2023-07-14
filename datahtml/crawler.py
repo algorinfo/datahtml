@@ -276,6 +276,26 @@ class ChromeV4(CrawlerSpec):
             )
         return rsp
 
+    def duckduckgo_search(
+        self, text, next_page=None, engine_url="https://duckduckgo.com", timeout_secs=60
+    ) -> CrawlResponse:
+        client = httpx.Client(headers=self._headers, timeout=timeout_secs + 10)
+
+        payload = asdict(self._conf)
+        payload["url"] = engine_url
+        if self.proxy:
+            payload["proxy"] = self.proxy.dict()
+        payload["text"] = text
+        del(payload["waitElement"])
+        r = client.post(f"{self._url}/v4/duckduckgo-search", json=payload)
+        rsp = CrawlResponse(
+                url=engine_url,
+                headers=dict(r.headers),
+                status_code=r.status_code,
+                content=r.content,
+            )
+        return rsp
+
 
 def default_chrome(*, service, token) -> ChromeV4:
     cf = ChromeConfig()
