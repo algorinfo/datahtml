@@ -17,6 +17,7 @@ def test_parsers_parse_url():
 
     assert r1.url_short == "www.google.com" 
     assert r2.url_short == "www.google.com/test"
+    assert r2.norm == "google.com/test"
     assert r1.secure
     assert r3.secure is False
     assert r2.www

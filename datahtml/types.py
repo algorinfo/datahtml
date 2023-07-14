@@ -7,9 +7,13 @@ from attr import asdict, define
 
 @dataclass
 class Link:
+    #: text extract from the link
     title: str
+    #: the real link
     href: str
+    #: if is internal to site or external (another domain)
     internal: bool
+    #: if is't a file
     is_file: bool
 
     def __hash__(self):
@@ -18,15 +22,48 @@ class Link:
 
 @dataclass
 class URL:
+    """
+    Represents a url. Usually parsed using :func:`datahtml.parsers.parse_url`
+    
+    :param fullurl: the origina given url
+    :param url_short: a normalized url. It's mantained only for compatibility.
+       It will be deprecated because also keeps `www.` attribute.
+    :param norm: a real normalize url, with slashes at the end,
+       nor queryparams nor www, nor protocol, only domain and path.
+    :param www: a boolean value indicating if the original url has www
+    :param secure: If the protocol is http or https
+    :param domain_base: represents the domain, nor paths nor protocol
+    :param netloc: netloc value as provided by urllib's parse function.
+       The difference with the norm attribute is that netloc could include port
+       and www.
+    :param path: path of the url, it keeps queryparams.
+    :param tld: tld part of the domain. It could be deprecated
+       in a future release
+    :param is_social: check if the url belongs to know social network.
+       It could be deprecated in future releases.
+
+
+    .. code-block:: python
+
+        url = parse_url("https://www.algorinfo.com/testing?query=params")
+        print(url.norm)
+        algorinfo.com/testing
+    
+
+
+    .. versionadded:: 0.4.0rc14
+        norm attribute 
+    """
     fullurl: str
-    url_short: str
+    url_short: str # Mantained only for compatibility but it will be deprecated
+    norm: str # Mantained only for compatibility but it will be deprecated
     www: bool
     secure: bool
     domain_base: str  # withouth www
     netloc: str  # parsed with urlparsed from python
     path: str
-    is_social: bool
     tld: str
+    is_social: bool = False
 
     # def text(self):
     #    return text_from_link(self.fullurl)

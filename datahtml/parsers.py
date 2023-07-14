@@ -131,7 +131,12 @@ def get_domain_base(url: str) -> str:
 
 
 def parse_url(url: str, socials_url=SOCIALS_COM) -> types.URL:
-    """Parse a url string to URL.
+    """Parse a url string to :class:`datahtml.types.URL`.
+
+    :param url: the fullurl to be parsed
+    :param socials_url: it's a list used to identify if the url belongs
+       to any know social network or not. It could be deprecated
+       in the future because it's seem out of scope for this function.
 
     For developers:
     URL_REGEX return a tuple with 3 values:
@@ -148,6 +153,7 @@ def parse_url(url: str, socials_url=SOCIALS_COM) -> types.URL:
     domain = url_regex[0][1]
     domain_base = domain
     fullurl, url_short = url_norm(url)
+    norm = url_short
 
     netloc = _u.netloc
     www = False
@@ -156,14 +162,18 @@ def parse_url(url: str, socials_url=SOCIALS_COM) -> types.URL:
         www = True
         domain_base = _www[1]
         netloc = netloc.split("www.")[1]
+        norm = url_short.split("www.")[1]
 
-    _is_social = is_social(domain_base, socials_url)
+    _is_social = False
+    if socials_url: 
+        _is_social = is_social(domain_base, socials_url)
     is_secure = protocol == "https"
     tld = domain.split(".")[-1]
 
     return types.URL(
         fullurl=fullurl,
         url_short=url_short,
+        norm=norm,
         domain_base=domain_base,
         netloc=_u.netloc,
         path=path,
