@@ -2,4 +2,4 @@
 #
 # SPDX-License-Identifier: MIT
 
-from .base import CrawlerSpec
+from .base import CrawlerSpec, CrawlResponse
