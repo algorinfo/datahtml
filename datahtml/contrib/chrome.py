@@ -7,7 +7,8 @@ import httpx
 from datahtml import errors, types
 from datahtml.base import CrawlerSpec, CrawlResponse
 
-UA = ("Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",)
+UA = "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
+_DEFAULT_URL = "http://localhost:3000"
 
 
 @dataclass
@@ -120,7 +121,7 @@ class _AxiosRequest:
     url: str
     ts: int = 60
     headers: Dict[str, Any] = field(default_factory=default_headers)
-    proxy: Optional[Proxy] = None
+    # proxy: Optional[Proxy] = None
 
 
 def prepare_google_req(text: str) -> SearchGoogle:
@@ -167,9 +168,9 @@ class ChromeV5(CrawlerSpec):
 
     def __init__(
         self,
-        config: ChromeConfig,
         token,
-        url="http://localhost:3000",
+        url=_DEFAULT_URL,
+        config: Optional[ChromeConfig] = None,
         service_ts_secs=60,
         proxy: Optional[types.ProxyConf] = None,
     ):
@@ -188,7 +189,7 @@ class ChromeV5(CrawlerSpec):
         self._url = url
         self._token = token
         self._headers = {"Authorization": f"Bearer {self._token}"}
-        self._conf = config
+        self._conf = config or ChromeConfig()
         self._service_ts = service_ts_secs
 
         self.proxy = proxy
@@ -325,7 +326,7 @@ class AxiosCrawlerV5(CrawlerSpec):
     def __init__(
         self,
         token,
-        url="http://localhost:3000",
+        url=_DEFAULT_URL,
         service_ts_secs=60,
         proxy: Optional[types.ProxyConf] = None,
     ):
@@ -343,6 +344,12 @@ class AxiosCrawlerV5(CrawlerSpec):
 
         self.proxy = proxy
 
+    def __str__(self) -> str:
+        return f"<AxiosV5 {self._url}>"
+
+    def __repr__(self) -> str:
+        return f"<AxiosV5 {self._url}>"
+
     def get(
         self,
         url,
@@ -357,7 +364,7 @@ class AxiosCrawlerV5(CrawlerSpec):
         try:
             r = httpx.post(
                 f"{self._url}/{self.version}/axios",
-                data=asdict(req),
+                json=asdict(req),
                 headers=self._headers,
                 timeout=self._service_ts,
             )
@@ -391,7 +398,7 @@ class AxiosCrawlerV5(CrawlerSpec):
         try:
             r = await client.post(
                 f"{self._url}/{self.version}/axios",
-                data=asdict(req),
+                json=asdict(req),
                 headers=self._headers,
                 timeout=self._service_ts,
             )
@@ -445,7 +452,12 @@ class AxiosCrawlerV5(CrawlerSpec):
         return False
 
 
-def default_chrome(*, service, token) -> ChromeV5:
+def default_chrome(*, token, service) -> ChromeV5:
     cf = ChromeConfig()
     c = ChromeV5(config=cf, url=service, token=token)
     return c
+
+
+def default_axios(*, token, service) -> AxiosCrawlerV5:
+    ac = AxiosCrawlerV5(token, url=service)
+    return ac
