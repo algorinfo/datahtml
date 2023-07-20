@@ -25,6 +25,10 @@ class WebDocument:
         self.soup = parsers.text2soup(html_txt)
         self.is_root = is_root
 
+    @property
+    def html(self) -> str:
+        return self._html
+
     @classmethod
     def parse(
         cls,
@@ -183,7 +187,7 @@ def build_sitemap(
                         pass
         except errors.CrawlingError:
             pass
-                        
+
     return total_sites
 
 

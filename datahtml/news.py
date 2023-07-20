@@ -13,6 +13,7 @@ class ArticleData:
     text: str
     html: str
     img: Optional[str] = None
+    title: Optional[str] = None
     publish_date: Optional[datetime] = None
 
     @classmethod
@@ -22,6 +23,7 @@ class ArticleData:
         a.parse()
         return cls(url=url, text=a.text, publish_date=a.publish_date,
                    html=html,
+                   title=a.title,
                    img=a.top_image)
 
     @classmethod
