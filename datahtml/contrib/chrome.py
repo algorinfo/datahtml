@@ -1,7 +1,8 @@
 import os
+import urllib.parse
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional
-import urllib.parse
+
 import httpx
 
 from datahtml import errors, types
@@ -9,6 +10,43 @@ from datahtml.base import CrawlerSpec, CrawlResponse
 
 UA = "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
 _DEFAULT_URL = "http://localhost:3000"
+
+from datahtml.errors import URLParsingError
+from datahtml.parsers import parse_url, text2soup
+from datahtml.types import URL
+
+
+@dataclass
+class DuckLink:
+    link: URL
+    text: str
+    from_search: str
+
+
+def process_duckduck(content, from_search) -> List[DuckLink]:
+    """
+    from the response of duckduck, it needs the raw response from the :class:`CrawlResponse` object.
+    This is as a workaround because chrome_crawler is not working well. 
+    """
+
+    soup = text2soup(content)
+    autos = []
+    for art in soup.find_all("article"):
+        links = art.find_all(href=True)
+        for l in links:
+            _url = l["href"]
+            try:
+                parsed = parse_url(_url)
+                if parsed.netloc and parsed.netloc != "duckduckgo.com":
+                    _auto = DuckLink(
+                        link=parsed, text=art.text, from_search=from_search
+                    )
+                    autos.append(_auto)
+                    break
+            except URLParsingError:
+                pass
+
+    return autos
 
 
 @dataclass
@@ -260,14 +298,13 @@ class ChromeV5(CrawlerSpec):
                 status_code=r.status_code,
                 content=r.content,
             )
-            
+
             return rsp
         except httpx.HTTPError as e:
             # err = traceback.format_exc()
             raise errors.CrawlHTTPError(str(e))
         finally:
             await client.aclose()
-
 
     def google_search(self, req: SearchGoogle) -> CrawlResponse:
         client = httpx.Client(headers=self._headers, timeout=self._service_ts)
@@ -301,8 +338,6 @@ class ChromeV5(CrawlerSpec):
         except httpx.HTTPError as e:
             # err = traceback.format_exc()
             raise errors.CrawlHTTPError(str(e))
-
-
 
     def probe(self) -> bool:
         rsp = httpx.get(self._url, timeout=self._service_ts)
@@ -416,7 +451,7 @@ class AxiosCrawlerV5(CrawlerSpec):
 
     def image(self, url: str) -> ImageResponse:
         params = urllib.parse.urlencode({"url": url})
-        
+
         try:
             r = httpx.get(
                 f"{self._url}/{self.version}/image?{params}",
@@ -429,7 +464,7 @@ class AxiosCrawlerV5(CrawlerSpec):
                 headers=data.get("headers", {}),
                 status=data.get("status"),
                 image=data.get("image"),
-                error=data.get("error")
+                error=data.get("error"),
             )
             return rsp
         except httpx.HTTPError as e:
