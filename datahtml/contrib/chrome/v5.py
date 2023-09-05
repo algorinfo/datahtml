@@ -487,12 +487,12 @@ class AxiosCrawlerV5(CrawlerSpec):
         return False
 
 
-def default_chrome(*, token, service) -> ChromeV5:
+def default_chrome_v5(*, token, service) -> ChromeV5:
     cf = ChromeConfig()
     c = ChromeV5(config=cf, url=service, token=token)
     return c
 
 
-def default_axios(*, token, service) -> AxiosCrawlerV5:
+def default_axios_v5(*, token, service) -> AxiosCrawlerV5:
     ac = AxiosCrawlerV5(token, url=service)
     return ac
