@@ -29,13 +29,18 @@ dependencies = [
 	"extruct~=0.13.0",
 	"feedparser~=6.0.8",
 	# "reppy~=0.4.14",
-	"newspaper3k~=0.2.8",
 	"httpx~=0.23.0",
     	"pydantic~=1.10.7",
 	"attrs~=23.1.0",
         
 ]
 dynamic = ["version"]
+
+[project.optional-dependencies]
+news = [
+   "newspaper3k~=0.2.8",
+]
+
 
 [project.urls]
 Documentation = "https://github.com/algorinfo/datahtml#readme"
