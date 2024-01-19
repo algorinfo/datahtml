@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional, Union
 
 from dateutil.parser import parse as dtparser
-from pydantic import BaseModel
+from attrs import define
 
 from datahtml.base import CrawlerSpec
 from datahtml.parsers import text2soup
@@ -21,14 +21,15 @@ def _dt_parser(published) -> Union[datetime, None]:
     return dt
 
 
-class NewsItem(BaseModel):
+@define
+class NewsItem:
     title: str
     snippet: str
     url: str
     source: str
 
-
-class GoogleTrend(BaseModel):
+@define
+class GoogleTrend:
     title: str
     aprox_traffic: str
     description: str
@@ -37,7 +38,8 @@ class GoogleTrend(BaseModel):
     picture: Optional[str] = None
 
 
-class GoogleTrendList(BaseModel):
+@define
+class GoogleTrendList:
     geo: str
     trends: List[GoogleTrend]
 
