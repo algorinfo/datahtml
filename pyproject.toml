@@ -29,12 +29,12 @@ dependencies = [
     "lxml",
 	"ujson~=5.10.0",
 	"extruct~=0.17.0",
-	"feedparser~=6.0.8",
+	"feedparser",
 	# "reppy~=0.4.14",
-	"httpx~=0.27.0",
+	"httpx",
   	# "pydantic~=1.10.7",
-   	"pydantic~=2.5.3",
-	"attrs~=23.1.0",
+   	"pydantic~=2",
+	"attrs",
         
 ]
 dynamic = ["version"]
