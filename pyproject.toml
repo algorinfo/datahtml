@@ -33,7 +33,7 @@ dependencies = [
 	# "reppy~=0.4.14",
 	"httpx",
   	# "pydantic~=1.10.7",
-   	"pydantic~=2",
+   	"pydantic>=2",
 	"attrs",
         
 ]
