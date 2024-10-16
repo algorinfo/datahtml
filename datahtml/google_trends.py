@@ -7,7 +7,7 @@ from attrs import define
 from datahtml.base import CrawlerSpec
 from datahtml.parsers import text2soup
 
-_URL = "https://trends.google.com/trends/trendingsearches/daily/rss?geo="
+URL = "https://trends.google.com/trending/rss?geo="
 
 
 def _dt_parser(published) -> Union[datetime, None]:
@@ -82,8 +82,9 @@ def download(
     geo: str,
     *,
     crawler: CrawlerSpec,
+    url: str = URL, 
 ) -> List[GoogleTrend]:
-    rsp = crawler.get(f"{_URL}{geo}")
+    rsp = crawler.get(f"{url}{geo.upper()}")
     soup = text2soup(rsp.text)
     trends = parse_entries(soup)
     return trends

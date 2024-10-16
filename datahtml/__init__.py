@@ -3,3 +3,5 @@
 # SPDX-License-Identifier: MIT
 
 from .base import CrawlerSpec, CrawlResponse
+from .crawler import LocalCrawler
+from .types import ProxyConf, Link, URL
