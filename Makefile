@@ -1,9 +1,12 @@
 
-#.PHONY: shell
-#shell:
-#	hatch shell
+.PHONY: cov
+cov:
+	uv run pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=datahtml --cov=tests
+
+.PHONY: test
+test:
+	uv run pytest
 
 .PHONY: docs-serve
 docs-serve:
-	hatch run sphinx-autobuild docs docs/_build/html --port 9292 --watch ./
-
+	uv run --group docs sphinx-autobuild docs docs/_build/html --port 9292 --watch ./

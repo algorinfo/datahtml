@@ -23,19 +23,14 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-    #"beautifulsoup4~=4.10.0",
-    # "lxml~=4.6.3",
     "beautifulsoup4",
     "lxml",
 	"ujson~=5.10.0",
 	"extruct~=0.17.0",
 	"feedparser",
-	# "reppy~=0.4.14",
 	"httpx",
-  	# "pydantic~=1.10.7",
    	"pydantic>=2",
 	"attrs",
-        
 ]
 dynamic = ["version"]
 
@@ -43,7 +38,6 @@ dynamic = ["version"]
 news = [
    "newspaper3k~=0.2.8",
 ]
-
 
 [project.urls]
 Documentation = "https://github.com/algorinfo/datahtml#readme"
@@ -53,29 +47,24 @@ Source = "https://github.com/algorinfo/datahtml"
 [tool.hatch.version]
 path = "datahtml/__about__.py"
 
-[tool.hatch.envs.default]
-dependencies = [
+[dependency-groups]
+dev = [
   "pytest",
   "pytest-cov",
   "pytest-asyncio",
   "mypy~=1.0.1",
-  "pip-tools",
   "isort",
-  "pylint>2.6.0", # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#id4
+  "pylint>2.6.0",
   "black~=22.10.0",
-  "black-macchiato", # for partial update of buffers in emacs
+  "black-macchiato",
+  "ipython",
+  "datahtml[news]",
+]
+docs = [
   "Sphinx~=5.3.0",
   "sphinx-autobuild",
-  # "furo", # sphinx theme
   "sphinx-rtd-theme",
-  "ipython"
 ]
-[tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=datahtml --cov=tests {args}"
-no-cov = "cov --no-cov {args}"
-
-[[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311"]
 
 [tool.coverage.run]
 branch = true
